@@ -74,11 +74,12 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
+    scores = np.dot((np.dot(X, self.params['W1'] + self.params['b1'])), self.params['W2']) + self.params['b2']
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
-    
+
     # If the targets are not given then jump out, we're done
     if y is None:
       return scores
@@ -208,11 +209,11 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
+    y_pred = np.dot((np.dot(X, self.params['W1'] + self.params['b1'])), self.params['W2']) + self.params['b2']
+
     pass
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
 
     return y_pred
-
-
