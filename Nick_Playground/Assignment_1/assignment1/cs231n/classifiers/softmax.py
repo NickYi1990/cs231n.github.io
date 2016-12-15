@@ -71,14 +71,16 @@ def softmax_loss_vectorized(W, X, y, reg):
   num_dim = W.shape[0]
   num_train = X.shape[0]
   num_class = W.shape[1]
+  # Think about create a matrix with all scores!!!!!!!!!!!!
   correct_class_weight = W.T[y]
   print np.sum(np.multiply(X,correct_class_weight), axis=1).shape
   print np.sum(np.dot(X,W), axis=1).shape
   loss = np.sum(-np.log(
                         np.divide(
-                                np.sum(np.exp(np.multiply(X,correct_class_weight)), axis=1),
+                                np.exp(np.sum(np.multiply(X,correct_class_weight), axis=1)),
                                 np.sum(np.exp(np.dot(X,W)), axis=1)))
                         )
+
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
