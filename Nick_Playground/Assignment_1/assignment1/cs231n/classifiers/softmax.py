@@ -71,22 +71,23 @@ def softmax_loss_vectorized(W, X, y, reg):
   num_dim = W.shape[0]
   num_train = X.shape[0]
   num_class = W.shape[1]
-  # Think about create a matrix with all scores!!!!!!!!!!!!
-  correct_class_weight = W.T[y]
-  print np.sum(np.multiply(X,correct_class_weight), axis=1).shape
-  print np.sum(np.dot(X,W), axis=1).shape
-  loss = np.sum(-np.log(
-                        np.divide(
-                                np.exp(np.sum(np.multiply(X,correct_class_weight), axis=1)),
-                                np.sum(np.exp(np.dot(X,W)), axis=1)))
-                        )
-
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
+  # Think about create a matrix with all scores!!!!!!!!!!!!
+  scores = np.dot(X,W) #compute scores for all data point
+  scores -= np.max(scores, axis=1)[:,np.newaxis] #substract max value of each row to keep numeric stability
+  exp_scores = np.exp(scores) #exponent scores
+  miss = np.divide(exp_scores, np.sum(exp_scores, axis=1)[:,np.newaxis]) #compute probability
+  loss = np.sum(-np.log(miss[np.arange(num_train), y])) + 0.5*reg*np.sum(np.multiply(W,W)) #compute loss
+  miss[np.arange(num_train), y] -= 1 # prepare for computing derivative
+  dW = np.dot(X.T,miss) + W # compute derivative of all points
+
+  loss /= num_train
+  dW /= num_train
 
   pass
   #############################################################################
