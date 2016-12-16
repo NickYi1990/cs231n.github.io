@@ -63,8 +63,8 @@ class TwoLayerNet(object):
       with respect to the loss function; has the same keys as self.params.
     """
     # Unpack variables from the params dictionary
-    W1, b1 = self.params['W1'], self.params['b1']
-    W2, b2 = self.params['W2'], self.params['b2']
+    W1, b1 = self.params['W1'], self.params['b1'] # shape (D, H) (H)
+    W2, b2 = self.params['W2'], self.params['b2'] # (H, C) (c)
     N, D = X.shape
 
     # Compute the forward pass
@@ -74,7 +74,9 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    scores = np.dot((np.dot(X, self.params['W1'] + self.params['b1'])), self.params['W2']) + self.params['b2']
+    scores_h1 = np.dot(X, W1) + b1[np.newaxis,:] # full-connected score of the first layer
+    scores_h2 = relu(scores_h1); # full-connected score of the first layer
+    scores = np.dot(scores_h2, W2) + b2[np.newaxis,:]
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -93,6 +95,14 @@ class TwoLayerNet(object):
     # classifier loss. So that your results match ours, multiply the            #
     # regularization loss by 0.5                                                #
     #############################################################################
+    scores -= np.max(scores, axis=1)[:,np.newaxis] #substract max value of each row to keep numeric stability (N,C) - (N,1) --> (N,C)
+    exp_scores = np.exp(scores) #exponent scores (N,C)
+    miss = np.divide(exp_scores, np.sum(exp_scores, axis=1)[:,np.newaxis]) #compute probability (N,C) / (N,1) --> (N,C)
+    loss = np.sum(-np.log(miss[np.arange(N), y])) #compute sum of loss for all data points (1,1)
+    miss[np.arange(N), y] -= 1 # prepare for computing derivative (N, C)
+
+    loss /= N
+    loss += 0.5*reg*np.sum(np.multiply(W1,W1)) + 0.5*reg*np.sum(np.multiply(W2,W2)) #for regularization, we should not divde sample number.
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -105,6 +115,7 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
+
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -209,7 +220,6 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    y_pred = np.dot((np.dot(X, self.params['W1'] + self.params['b1'])), self.params['W2']) + self.params['b2']
 
     pass
     ###########################################################################
@@ -217,3 +227,6 @@ class TwoLayerNet(object):
     ###########################################################################
 
     return y_pred
+
+  def relu(before_relu):
+      return np.maximun(0, before_relu)
