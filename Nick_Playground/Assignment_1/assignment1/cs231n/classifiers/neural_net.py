@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class TwoLayerNet(object):
   """
   A two-layer fully-connected neural network. The net has an input dimension of
@@ -66,7 +65,7 @@ class TwoLayerNet(object):
     W1, b1 = self.params['W1'], self.params['b1'] # shape (D, H) (H)
     W2, b2 = self.params['W2'], self.params['b2'] # (H, C) (C)
     N, D = X.shape
-
+    # print self.params['b2'].shape
     # Compute the forward pass
     scores = None
     #############################################################################
@@ -75,7 +74,7 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
     scores_h1 = np.dot(X, W1) + b1[np.newaxis,:] # full-connected score of the first layer (N, H)
-    scores_h2 = relu(scores_h1); # full-connected score of the first layer (N, H)
+    scores_h2 = relu(scores_h1) # full-connected score of the first layer (N, H)
     scores = np.dot(scores_h2, W2) + b2[np.newaxis,:] #(N, C)
     pass
     #############################################################################
@@ -96,7 +95,7 @@ class TwoLayerNet(object):
     # regularization loss by 0.5                                                #
     #############################################################################
     scores -= np.max(scores, axis=1)[:,np.newaxis] #substract max value of each row to keep numeric stability (N,C) - (N,1) --> (N,C)
-    print (np.max(scores, axis=1)[:,np.newaxis]).shape
+    # print (np.max(scores, axis=1)[:,np.newaxis]).shape
     exp_scores = np.exp(scores) #exponent scores (N,C)
     miss = np.divide(exp_scores, np.sum(exp_scores, axis=1)[:,np.newaxis]) #compute probability (N,C) / (N,1) --> (N,C)
     loss = np.sum(-np.log(miss[np.arange(N), y])) #compute sum of loss for all data points (1,1)
@@ -121,9 +120,17 @@ class TwoLayerNet(object):
     #dw/dw1 weight under w
     #dout/dw1 = dout/dw * dw/dw1
 
-    dout_dw = np.dot(X.T, miss) #(D,N)X(N,C) --> (D,C)
+    dout_score = miss/N #(H,N)
 
-    grads['W2'] = np.dot(scores_h2, ) #(H,D)X(D,C) --> (H,C)
+    grads['W2'] = np.dot(scores_h2.T, dout_score) + reg*W2#(H,N) X (N,C) --> (H,C)
+    grads['b2'] = np.sum(dout_score, axis=0) #(C,)
+    # print grads['b2'].shape
+    grads_relu = np.dot(dout_score, W2.T) # (N,C) X (C,H)-->(N,H)
+    grads_relu[scores_h2<=0] = 0 # backpropogating of relu layer
+
+    grads['W1'] = np.dot(X.T, grads_relu) + reg*W1# (D,N) (N,H)  --> (D,H)
+    grads['b1'] = np.sum(grads_relu, axis=0) #(H,)
+    # print grads['b1'].shape
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -236,5 +243,5 @@ class TwoLayerNet(object):
 
     return y_pred
 
-  def relu(before_relu):
-      return np.maximun(0, before_relu)
+def relu(before_relu):
+    return np.maximum(0, before_relu)
