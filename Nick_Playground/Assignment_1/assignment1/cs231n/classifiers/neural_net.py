@@ -64,7 +64,7 @@ class TwoLayerNet(object):
     """
     # Unpack variables from the params dictionary
     W1, b1 = self.params['W1'], self.params['b1'] # shape (D, H) (H)
-    W2, b2 = self.params['W2'], self.params['b2'] # (H, C) (c)
+    W2, b2 = self.params['W2'], self.params['b2'] # (H, C) (C)
     N, D = X.shape
 
     # Compute the forward pass
@@ -74,9 +74,9 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    scores_h1 = np.dot(X, W1) + b1[np.newaxis,:] # full-connected score of the first layer
-    scores_h2 = relu(scores_h1); # full-connected score of the first layer
-    scores = np.dot(scores_h2, W2) + b2[np.newaxis,:]
+    scores_h1 = np.dot(X, W1) + b1[np.newaxis,:] # full-connected score of the first layer (N, H)
+    scores_h2 = relu(scores_h1); # full-connected score of the first layer (N, H)
+    scores = np.dot(scores_h2, W2) + b2[np.newaxis,:] #(N, C)
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -96,6 +96,7 @@ class TwoLayerNet(object):
     # regularization loss by 0.5                                                #
     #############################################################################
     scores -= np.max(scores, axis=1)[:,np.newaxis] #substract max value of each row to keep numeric stability (N,C) - (N,1) --> (N,C)
+    print (np.max(scores, axis=1)[:,np.newaxis]).shape
     exp_scores = np.exp(scores) #exponent scores (N,C)
     miss = np.divide(exp_scores, np.sum(exp_scores, axis=1)[:,np.newaxis]) #compute probability (N,C) / (N,1) --> (N,C)
     loss = np.sum(-np.log(miss[np.arange(N), y])) #compute sum of loss for all data points (1,1)
@@ -115,7 +116,14 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
+    #Using Back Propagation
+    #dout/dw think about dw about the combination of weights of all hideen layers
+    #dw/dw1 weight under w
+    #dout/dw1 = dout/dw * dw/dw1
 
+    dout_dw = np.dot(X.T, miss) #(D,N)X(N,C) --> (D,C)
+
+    grads['W2'] = np.dot(scores_h2, ) #(H,D)X(D,C) --> (H,C)
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
